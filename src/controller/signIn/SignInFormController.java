@@ -1,6 +1,5 @@
 package controller.signIn;
 
-import controller.MainViewController;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -13,7 +12,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javax.swing.JOptionPane;
 import model.Account;
-import model.AccountDAO;
+import model.AccountsDAO;
+import static model.ConnectionPoolMySQL.EXCEPCIONES;
+import model.Country;
 import utilities.ControllerGeneralModel;
 
 /**
@@ -22,7 +23,7 @@ import utilities.ControllerGeneralModel;
  * @author JorgeLPR
  */
 public class SignInFormController implements Initializable {
-
+    
     @FXML
     private TextField txtUserSignIn, txtPasswordSignInMask;
     
@@ -33,19 +34,26 @@ public class SignInFormController implements Initializable {
     private CheckBox checkViewPassSignIn;
     
     @FXML
-    private Button btnFormSignIn, btnCleanSignIn;
+    private Button btnSignIn, btnClean;
     
-    private AccountDAO modelUser;
+    private Account account;
+    private AccountsDAO modelUser = new AccountsDAO();
+        
+    public void cleanFields(){
+        txtPasswordSignIn.setText("");
+        txtPasswordSignInMask.setText("");
+        txtUserSignIn.setText("");        
+    }
     
     @FXML
-    public void keyEvent(KeyEvent e){
+    public void eventKey(KeyEvent e){
         
         String c = e.getCharacter();
         
         if(c.equalsIgnoreCase(" ")){
             e.consume();
         }
-                
+        
     }
     
     @FXML
@@ -53,25 +61,34 @@ public class SignInFormController implements Initializable {
         
         Object evt = e.getSource();
         
-        if(evt.equals(btnFormSignIn)){
-            
+        if(btnSignIn.equals(evt)){                    
+                         
             if(!txtUserSignIn.getText().isEmpty() && !txtPasswordSignIn.getText().isEmpty()){
 
-                Account account = modelUser.selectAccount(txtUserSignIn.getText());
+                String filter;
+                
+                if(ControllerGeneralModel.validateEmail(txtUserSignIn.getText())){
+                    filter = "email";
+                }else{
+                    filter = "user";                
+                }
+                
+                account = modelUser.selectAccount(txtUserSignIn.getText(), filter);
                 
                 if(account != null){
 
                     if(account.getPassword().equals(txtPasswordSignIn.getText())){
                         JOptionPane.showMessageDialog(null, "Bienvenido", "INFORMACIÓN", JOptionPane.INFORMATION_MESSAGE);                    
+                        cleanFields();
                     }else{
                         JOptionPane.showMessageDialog(null, "La Contraseña que ha ingresado no es la correcta", "ADVERTENCIA", JOptionPane.WARNING_MESSAGE);                                            
                     }
 
                 }else{
 
-                    if(AccountDAO.EXCEPCIONES.size()>0){
+                    if(EXCEPCIONES.size()>0){
                         JOptionPane.showMessageDialog(null, "Surgieron errores en el proceso de consulta, posibles errores:\n"+
-                                                      ControllerGeneralModel.toString(AccountDAO.EXCEPCIONES), "ERROR", JOptionPane.ERROR_MESSAGE);
+                                                      ControllerGeneralModel.toString(EXCEPCIONES), "ERROR", JOptionPane.ERROR_MESSAGE);
                     }else{
                         JOptionPane.showMessageDialog(null, "El Usuario no existe en la Base de Datos", "SIN RESULTADOS", JOptionPane.ERROR_MESSAGE);
                     }
@@ -80,21 +97,16 @@ public class SignInFormController implements Initializable {
             
             }else{
                 JOptionPane.showMessageDialog(null, "Debe llenar los campos obligatorios", "ERROR", JOptionPane.ERROR_MESSAGE);
-            }
-            
-        }else if(evt.equals(btnCleanSignIn)){
-            txtUserSignIn.setText("");
-            txtPasswordSignIn.setText("");
-            checkViewPassSignIn.setSelected(false);
+            }            
+                        
+        }else if(btnClean.equals(evt)){        
+            cleanFields();
         }
-        
-    }    
     
-    protected MainViewController rootController;
-    
-    public void getControllerRoot(MainViewController rootController){
-        this.rootController = rootController;
     }
+    
+    
+    
     
     /**
      * Initializes the controller class.
@@ -103,24 +115,33 @@ public class SignInFormController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
         maskPassword(txtPasswordSignIn, txtPasswordSignInMask, checkViewPassSignIn);
-        modelUser = new AccountDAO();
+        
+        /*
+        txtUserSignIn.addEventFilter(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {                
+                if(event.getCharacter().equals(" ")){
+                    event.consume();
+                }                
+            }
+        });*/
+        
     }    
     
     public void maskPassword(PasswordField pass, TextField text, CheckBox check){
-
-        text.setManaged(false);
+    
         text.setVisible(false);
-
+        text.setManaged(false);
+            
         text.managedProperty().bind(check.selectedProperty());
         text.visibleProperty().bind(check.selectedProperty());
-
-        pass.managedProperty().bind(check.selectedProperty().not());
-        pass.visibleProperty().bind(check.selectedProperty().not());
-
+        
         text.textProperty().bindBidirectional(pass.textProperty());
     
     }
+    
     
     
 }

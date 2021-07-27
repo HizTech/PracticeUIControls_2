@@ -5,12 +5,12 @@
  */
 package model;
 
-import java.awt.HeadlessException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import static model.ConnectionPoolMySQL.EXCEPCIONES;
 import utilities.ControllerGeneralModel;
 
 /**
@@ -19,28 +19,25 @@ import utilities.ControllerGeneralModel;
  */
 public class CountryDAO {
     
-    public  static ArrayList<String> EXCEPCIONES;
+    public ArrayList<Country> selectCountries(){
     
-    public ArrayList<Country> selectCountry(){
-        
-        EXCEPCIONES = new ArrayList<>();
+        EXCEPCIONES = new ArrayList<>();        
         
         Connection connection = null;
         PreparedStatement pst;
-        ResultSet rs;        
+        ResultSet rs;
         
         Country country;
-        ArrayList<Country> listCountry =new ArrayList<>();
+        ArrayList<Country> list = new ArrayList<>();
         
         try{
-            
+        
             connection = ConnectionPoolMySQL.getInstance().getConnection();
             
             if(connection!=null){
-                
+            
                 String sql = "SELECT id, country, city "
                         + "FROM countries "
-                        + "WHERE 1 "
                         + "ORDER BY country ASC";
                 
                 pst = connection.prepareStatement(sql);
@@ -52,29 +49,30 @@ public class CountryDAO {
                     country.setId(rs.getInt("id"));
                     country.setCountry(rs.getString("country"));
                     country.setCity(rs.getString("city"));
-                    listCountry.add(country);
-                }
+                    list.add(country);
+                }                
                 
-            }else{                
-                EXCEPCIONES.add(ControllerGeneralModel.enumSizeExcepcion(EXCEPCIONES)+"- "+"Error al conectar con la base de datos");
+            }else{
+                EXCEPCIONES.add(ControllerGeneralModel.enumSizeExcepcion(EXCEPCIONES)+"- "+"Error al conectar con la base de datos");                
             }
             
-        }catch(HeadlessException | SQLException ex){
-            EXCEPCIONES.add(ControllerGeneralModel.enumSizeExcepcion(EXCEPCIONES)+"- "+ex.getMessage());            
-        }finally{
             
+        }catch(SQLException ex){
+            EXCEPCIONES.add(ControllerGeneralModel.enumSizeExcepcion(EXCEPCIONES)+"- "+ex.getMessage());                        
+        }finally{
             try{
                 if(connection != null){
                     ConnectionPoolMySQL.getInstance().closeConnection(connection);            
                 }            
             }catch(SQLException ex){
                 EXCEPCIONES.add(ControllerGeneralModel.enumSizeExcepcion(EXCEPCIONES)+"- "+ex.getMessage());
-            }
-
+            }        
         }
         
-        return listCountry;
+        System.out.println(EXCEPCIONES);
         
-    }    
+        return list;
+    
+    }
     
 }

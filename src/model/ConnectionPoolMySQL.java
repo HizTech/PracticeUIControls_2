@@ -2,6 +2,7 @@ package model;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
@@ -10,6 +11,8 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 public class ConnectionPoolMySQL {
  
+    public static ArrayList<String> EXCEPCIONES;
+    
     private final String DB="hiztechsoft";
     private final String URL="jdbc:mysql://localhost:3306/"+DB+"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private final String USER="root";
@@ -47,7 +50,5 @@ public class ConnectionPoolMySQL {
     public void closeConnection(Connection connection) throws SQLException {
         connection.close();
     }    
-    
-    
     
 }

@@ -16,10 +16,7 @@ public class Account {
     private String user;
     private String password;
     private Country country;
-    
-    public Account() {
-    }
-    
+
     public Account(int id, String email, String user, String password, Country country) {
         this.id = id;
         this.email = email;
@@ -27,7 +24,10 @@ public class Account {
         this.password = password;
         this.country = country;
     }
-    
+
+    public Account() {
+    }
+
     public int getId() {
         return id;
     }
@@ -67,6 +67,7 @@ public class Account {
     public void setCountry(Country country) {
         this.country = country;
     }
-
+    
+    
     
 }

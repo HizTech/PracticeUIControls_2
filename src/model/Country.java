@@ -12,19 +12,17 @@ package model;
 public class Country {
     
     private int id;
-    private String country;
-    private String city;
+    private String country, city;
 
-    public Country(){}
-    
     public Country(int id, String country, String city) {
         this.id = id;
         this.country = country;
         this.city = city;
     }
 
-    
-    
+    public Country() {
+    }
+
     public int getId() {
         return id;
     }
@@ -49,5 +47,6 @@ public class Country {
         this.city = city;
     }
     
-
+    
+    
 }
